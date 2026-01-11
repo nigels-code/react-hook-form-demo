@@ -18,18 +18,15 @@ export function ContactForm() {
   } = useForm<ContactFormData>();
 
   const onSubmit = async (data: ContactFormData) => {
-    // Validate all fields on server before submitting
     const validationResponse = await validateForm(data);
 
     if (!validationResponse.success) {
-      // Set errors for each invalid field
       for (const [field, message] of Object.entries(validationResponse.errors)) {
         setError(field as keyof ContactFormData, { type: 'server', message });
       }
       return;
     }
 
-    // Submit the validated data
     await submitForm(validationResponse.data);
     alert('Message sent successfully!');
     reset();
