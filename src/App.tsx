@@ -1,9 +1,8 @@
 import { ContactForm } from './ContactForm'
-import './App.css'
 
 function App() {
   return (
-    <div className="app">
+    <div className="min-h-screen flex justify-center items-center p-8 bg-gray-100">
       <ContactForm />
     </div>
   )

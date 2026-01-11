@@ -1,6 +1,12 @@
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { contactFormSchema, type ContactFormData } from './validation';
+import { validateForm, submitForm } from './api';
+
+interface ContactFormData {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
 
 export function ContactForm() {
   const {
@@ -8,46 +14,98 @@ export function ContactForm() {
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm<ContactFormData>({
-    resolver: zodResolver(contactFormSchema),
-    mode: 'onTouched',
-  });
+    setError,
+  } = useForm<ContactFormData>();
 
   const onSubmit = async (data: ContactFormData) => {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log('Form submitted:', data);
+    // Validate all fields on server before submitting
+    const validationResponse = await validateForm(data);
+
+    if (!validationResponse.success) {
+      // Set errors for each invalid field
+      for (const [field, message] of Object.entries(validationResponse.errors)) {
+        setError(field as keyof ContactFormData, { type: 'server', message });
+      }
+      return;
+    }
+
+    // Submit the validated data
+    await submitForm(validationResponse.data);
     alert('Message sent successfully!');
     reset();
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="contact-form">
-      <div className="form-group">
-        <label htmlFor="name">Name</label>
-        <input id="name" type="text" {...register('name')} />
-        {errors.name && <span className="error">{errors.name.message}</span>}
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="w-full max-w-4xl p-8 bg-gray-300 rounded-lg shadow-lg"
+      noValidate
+    >
+      <div className="mb-5">
+        <label htmlFor="name" className="block mb-2 font-medium text-gray-700">
+          Name
+        </label>
+        <input
+          id="name"
+          type="text"
+          className="w-full px-3 py-2 bg-white border border-gray-300 rounded focus:outline-none focus:border-indigo-500"
+          {...register('name')}
+        />
+        {errors.name && (
+          <span className="block mt-2 text-sm text-red-600">{errors.name.message}</span>
+        )}
       </div>
 
-      <div className="form-group">
-        <label htmlFor="email">Email</label>
-        <input id="email" type="email" {...register('email')} />
-        {errors.email && <span className="error">{errors.email.message}</span>}
+      <div className="mb-5">
+        <label htmlFor="email" className="block mb-2 font-medium text-gray-700">
+          Email
+        </label>
+        <input
+          id="email"
+          type="email"
+          className="w-full px-3 py-2 bg-white border border-gray-300 rounded focus:outline-none focus:border-indigo-500"
+          {...register('email')}
+        />
+        {errors.email && (
+          <span className="block mt-2 text-sm text-red-600">{errors.email.message}</span>
+        )}
       </div>
 
-      <div className="form-group">
-        <label htmlFor="subject">Subject</label>
-        <input id="subject" type="text" {...register('subject')} />
-        {errors.subject && <span className="error">{errors.subject.message}</span>}
+      <div className="mb-5">
+        <label htmlFor="subject" className="block mb-2 font-medium text-gray-700">
+          Subject
+        </label>
+        <input
+          id="subject"
+          type="text"
+          className="w-full px-3 py-2 bg-white border border-gray-300 rounded focus:outline-none focus:border-indigo-500"
+          {...register('subject')}
+        />
+        {errors.subject && (
+          <span className="block mt-2 text-sm text-red-600">{errors.subject.message}</span>
+        )}
       </div>
 
-      <div className="form-group">
-        <label htmlFor="message">Message</label>
-        <textarea id="message" rows={5} {...register('message')} />
-        {errors.message && <span className="error">{errors.message.message}</span>}
+      <div className="mb-5">
+        <label htmlFor="message" className="block mb-2 font-medium text-gray-700">
+          Message
+        </label>
+        <textarea
+          id="message"
+          rows={5}
+          className="w-full px-3 py-2 bg-white border border-gray-300 rounded resize-y focus:outline-none focus:border-indigo-500"
+          {...register('message')}
+        />
+        {errors.message && (
+          <span className="block mt-2 text-sm text-red-600">{errors.message.message}</span>
+        )}
       </div>
 
-      <button type="submit" disabled={isSubmitting}>
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="w-full py-3 font-medium text-white bg-indigo-500 rounded hover:bg-indigo-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+      >
         {isSubmitting ? 'Sending...' : 'Send Message'}
       </button>
     </form>
