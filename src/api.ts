@@ -1,17 +1,17 @@
-import { contactFormSchema } from './validation';
+import { contactFormSchema, type ContactFormData } from './validation';
 
 type ValidationErrors = {
   [key: string]: string;
 };
 
 type ValidateResponse =
-  | { success: true; data: { name: string; email: string; subject: string; message: string } }
+  | { success: true; data: ContactFormData }
   | { success: false; errors: ValidationErrors };
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export async function validateForm(data: unknown): Promise<ValidateResponse> {
-  await delay(300);
+  await delay(500);
 
   const result = contactFormSchema.safeParse(data);
 
@@ -30,13 +30,7 @@ export async function validateForm(data: unknown): Promise<ValidateResponse> {
   return { success: false, errors };
 }
 
-export async function submitForm(data: {
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-}): Promise<{ success: true }> {
-  await delay(1000);
+export async function submitForm(data: ContactFormData): Promise<{ success: true }> {
   console.log('Form submitted to server:', data);
   return { success: true };
 }

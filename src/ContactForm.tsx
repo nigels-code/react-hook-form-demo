@@ -1,12 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { validateForm, submitForm } from './api';
-
-interface ContactFormData {
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-}
+import { type ContactFormData } from './validation';
 
 export function ContactForm() {
   const {
